@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.myblog.mapper.UserAccountMapper">
+
+    <resultMap id="userAccountResultMap" type="com.example.myblog.domain.UserAccount">
+        <id property="id" column="id"/>
+        <result property="account" column="account"/>
+        <result property="passwordHash" column="password_hash"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findByAccount" resultMap="userAccountResultMap">
+        SELECT id, account, password_hash, created_at, updated_at
+        FROM user_account
+        WHERE LOWER(account) = LOWER(#{account})
+    </select>
+
+    <select id="findById" resultMap="userAccountResultMap">
+        SELECT id, account, password_hash, created_at, updated_at
+        FROM user_account
+        WHERE id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="com.example.myblog.domain.UserAccount" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO user_account (account, password_hash, created_at, updated_at)
+        VALUES (#{account}, #{passwordHash}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <select id="searchByAccount" resultType="com.example.myblog.domain.view.UserSearchResultView">
+        SELECT account,
+               CASE WHEN LOWER(account) = LOWER(#{query}) THEN TRUE ELSE FALSE END AS isExactMatch
+        FROM user_account
+        WHERE LOWER(account) LIKE CONCAT('%', LOWER(#{query}), '%')
+          AND LOWER(account) &lt;&gt; LOWER(#{excludeAccount})
+        ORDER BY
+            CASE WHEN LOWER(account) = LOWER(#{query}) THEN 0 ELSE 1 END,
+            LENGTH(account),
+            account
+        LIMIT #{limit}
+    </select>
+</mapper>

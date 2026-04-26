@@ -1,0 +1,22 @@
+spring:
+  application:
+    name: my-blog
+  datasource:
+    url: ${APP_DATASOURCE_URL:jdbc:mysql://117.72.42.182:3306/my_blog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&charset=utf8mb4}
+    username: ${APP_DATASOURCE_USERNAME:root}
+    password: ${APP_DATASOURCE_PASSWORD:1234}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  sql:
+    init:
+      mode: never
+server:
+  port: ${SERVER_PORT:8080}
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      timeout: ${APP_SESSION_TIMEOUT:7d}
+mybatis:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.example.myblog.domain,com.example.myblog.domain.view
+  configuration:
+    map-underscore-to-camel-case: true

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.myblog.mapper.FolderMapper">
+
+    <resultMap id="folderResultMap" type="com.example.myblog.domain.Folder">
+        <id property="id" column="id"/>
+        <result property="ownerUserId" column="owner_user_id"/>
+        <result property="name" column="name"/>
+        <result property="displayOrder" column="display_order"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findByOwnerUserId" resultMap="folderResultMap">
+        SELECT id, owner_user_id, name, display_order, created_at, updated_at
+        FROM folder
+        WHERE owner_user_id = #{ownerUserId}
+        ORDER BY display_order, id
+    </select>
+
+    <select id="findById" resultMap="folderResultMap">
+        SELECT id, owner_user_id, name, display_order, created_at, updated_at
+        FROM folder
+        WHERE id = #{id}
+    </select>
+
+    <select id="findByOwnerUserIdAndName" resultMap="folderResultMap">
+        SELECT id, owner_user_id, name, display_order, created_at, updated_at
+        FROM folder
+        WHERE owner_user_id = #{ownerUserId}
+          AND LOWER(name) = LOWER(#{name})
+    </select>
+
+    <select id="nextDisplayOrder" resultType="int">
+        SELECT COALESCE(MAX(display_order) + 1, 0)
+        FROM folder
+        WHERE owner_user_id = #{ownerUserId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.myblog.domain.Folder" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO folder (owner_user_id, name, display_order, created_at, updated_at)
+        VALUES (#{ownerUserId}, #{name}, #{displayOrder}, #{createdAt}, #{updatedAt})
+    </insert>
+</mapper>
+

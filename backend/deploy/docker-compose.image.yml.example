@@ -1,0 +1,15 @@
+services:
+  my-blog:
+    image: your-registry/my-blog:1.0.0
+    container_name: my-blog
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:8080"
+    env_file:
+      - .env
+    environment:
+      APP_DATASOURCE_URL: ${APP_DATASOURCE_URL}
+      APP_DATASOURCE_USERNAME: ${APP_DATASOURCE_USERNAME}
+      APP_DATASOURCE_PASSWORD: ${APP_DATASOURCE_PASSWORD}
+      SERVER_PORT: ${SERVER_PORT:-8080}
+      APP_SESSION_TIMEOUT: ${APP_SESSION_TIMEOUT:-7d}

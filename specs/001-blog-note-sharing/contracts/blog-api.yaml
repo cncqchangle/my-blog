@@ -1,0 +1,383 @@
+openapi: 3.1.0
+info:
+  title: Personal Blog Notes API
+  version: 1.0.0
+  description: >
+    HTTP contract for authentication, personal homepage browsing, note editing,
+    folder management, and user search/read-only note browsing.
+servers:
+  - url: http://localhost:8080
+security:
+  - sessionAuth: []
+components:
+  securitySchemes:
+    sessionAuth:
+      type: apiKey
+      in: cookie
+      name: JSESSIONID
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    LoginRequest:
+      type: object
+      required: [account, password]
+      properties:
+        account:
+          type: string
+        password:
+          type: string
+          format: password
+    LoginResponse:
+      type: object
+      required: [account]
+      properties:
+        account:
+          type: string
+    NoteSummary:
+      type: object
+      required: [noteId, title, updatedAt]
+      properties:
+        noteId:
+          type: integer
+          format: int64
+        title:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
+    FolderView:
+      type: object
+      required: [folderId, folderName, noteCount, notes]
+      properties:
+        folderId:
+          type: integer
+          format: int64
+        folderName:
+          type: string
+        noteCount:
+          type: integer
+        notes:
+          type: array
+          items:
+            $ref: '#/components/schemas/NoteSummary'
+    HomePageResponse:
+      type: object
+      required: [ownerAccount, isViewerOwner, folders]
+      properties:
+        ownerAccount:
+          type: string
+        isViewerOwner:
+          type: boolean
+        folders:
+          type: array
+          items:
+            $ref: '#/components/schemas/FolderView'
+    NoteDetailResponse:
+      type: object
+      required:
+        - noteId
+        - authorAccount
+        - folderId
+        - folderName
+        - title
+        - markdownContent
+        - renderedHtml
+        - isEditable
+        - updatedAt
+      properties:
+        noteId:
+          type: integer
+          format: int64
+        authorAccount:
+          type: string
+        folderId:
+          type: integer
+          format: int64
+        folderName:
+          type: string
+        title:
+          type: string
+        markdownContent:
+          type: string
+        renderedHtml:
+          type: string
+        isEditable:
+          type: boolean
+        updatedAt:
+          type: string
+          format: date-time
+    CreateFolderRequest:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
+    FolderCreatedResponse:
+      type: object
+      required: [folderId, name]
+      properties:
+        folderId:
+          type: integer
+          format: int64
+        name:
+          type: string
+    CreateNoteRequest:
+      type: object
+      required: [title, markdownContent, folderId]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        markdownContent:
+          type: string
+        folderId:
+          type: integer
+          format: int64
+    UpdateNoteRequest:
+      type: object
+      required: [title, markdownContent, folderId]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 200
+        markdownContent:
+          type: string
+        folderId:
+          type: integer
+          format: int64
+    NoteSavedResponse:
+      type: object
+      required: [noteId, updatedAt, renderedHtml]
+      properties:
+        noteId:
+          type: integer
+          format: int64
+        updatedAt:
+          type: string
+          format: date-time
+        renderedHtml:
+          type: string
+    SearchUserResponse:
+      type: object
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            type: object
+            required: [account]
+            properties:
+              account:
+                type: string
+              isExactMatch:
+                type: boolean
+paths:
+  /api/auth/login:
+    post:
+      summary: Login with account and password
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Login successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/auth/logout:
+    post:
+      summary: Logout current session
+      responses:
+        '204':
+          description: Logout successful
+  /api/users/me/home:
+    get:
+      summary: Get the logged-in user's homepage
+      responses:
+        '200':
+          description: Homepage loaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomePageResponse'
+  /api/users/search:
+    get:
+      summary: Search other users by fuzzy account match
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+            minLength: 1
+        - in: query
+          name: limit
+          required: false
+          schema:
+            type: integer
+            default: 10
+            minimum: 1
+            maximum: 20
+      responses:
+        '200':
+          description: Search completed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SearchUserResponse'
+  /api/users/{account}/home:
+    get:
+      summary: Get another user's homepage in read-only mode
+      parameters:
+        - in: path
+          name: account
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Homepage loaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HomePageResponse'
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/folders:
+    post:
+      summary: Create a top-level folder for the logged-in user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFolderRequest'
+      responses:
+        '201':
+          description: Folder created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FolderCreatedResponse'
+        '409':
+          description: Duplicate folder name for same user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/notes:
+    post:
+      summary: Create a note owned by the logged-in user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateNoteRequest'
+      responses:
+        '201':
+          description: Note created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteSavedResponse'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Target folder is not owned by current user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /api/notes/{noteId}:
+    get:
+      summary: Get note detail for viewing or editing
+      parameters:
+        - in: path
+          name: noteId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Note loaded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteDetailResponse'
+        '404':
+          description: Note not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    put:
+      summary: Update a note owned by the logged-in user
+      parameters:
+        - in: path
+          name: noteId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateNoteRequest'
+      responses:
+        '200':
+          description: Note updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NoteSavedResponse'
+        '400':
+          description: Validation failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Current user is not the note author
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Note not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'

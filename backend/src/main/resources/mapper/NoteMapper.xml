@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.myblog.mapper.NoteMapper">
+
+    <resultMap id="noteResultMap" type="com.example.myblog.domain.Note">
+        <id property="id" column="id"/>
+        <result property="authorUserId" column="author_user_id"/>
+        <result property="folderId" column="folder_id"/>
+        <result property="title" column="title"/>
+        <result property="markdownContent" column="markdown_content"/>
+        <result property="renderedHtml" column="rendered_html"/>
+        <result property="publicationStatus" column="publication_status"/>
+        <result property="createdAt" column="created_at"/>
+        <result property="updatedAt" column="updated_at"/>
+    </resultMap>
+
+    <select id="findSummariesByFolderId" resultType="com.example.myblog.domain.view.NoteSummaryView">
+        SELECT id AS noteId, title, updated_at AS updatedAt
+        FROM note
+        WHERE folder_id = #{folderId}
+        ORDER BY updated_at DESC, id DESC
+    </select>
+
+    <select id="findById" resultMap="noteResultMap">
+        SELECT id, author_user_id, folder_id, title, markdown_content, rendered_html, publication_status, created_at, updated_at
+        FROM note
+        WHERE id = #{id}
+    </select>
+
+    <select id="findDetailById" resultType="com.example.myblog.domain.view.NoteDetailRow">
+        SELECT n.id AS noteId,
+               u.account AS authorAccount,
+               f.id AS folderId,
+               f.name AS folderName,
+               n.title,
+               n.markdown_content AS markdownContent,
+               n.rendered_html AS renderedHtml,
+               n.updated_at AS updatedAt
+        FROM note n
+        INNER JOIN user_account u ON u.id = n.author_user_id
+        INNER JOIN folder f ON f.id = n.folder_id
+        WHERE n.id = #{noteId}
+    </select>
+
+    <insert id="insert" parameterType="com.example.myblog.domain.Note" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO note (author_user_id, folder_id, title, markdown_content, rendered_html, publication_status, created_at, updated_at)
+        VALUES (#{authorUserId}, #{folderId}, #{title}, #{markdownContent}, #{renderedHtml}, #{publicationStatus}, #{createdAt}, #{updatedAt})
+    </insert>
+
+    <update id="update" parameterType="com.example.myblog.domain.Note">
+        UPDATE note
+        SET folder_id = #{folderId},
+            title = #{title},
+            markdown_content = #{markdownContent},
+            rendered_html = #{renderedHtml},
+            updated_at = #{updatedAt}
+        WHERE id = #{id}
+    </update>
+</mapper>
+
