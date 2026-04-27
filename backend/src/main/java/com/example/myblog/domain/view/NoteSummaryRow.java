@@ -2,16 +2,10 @@ package com.example.myblog.domain.view;
 
 import java.time.LocalDateTime;
 
-public record NoteDetailView(
+public record NoteSummaryRow(
         Long noteId,
-        String authorAccount,
-        Long folderId,
-        String folderName,
         String title,
         String coverImageUrl,
         String markdownContent,
-        String renderedHtml,
-        boolean isEditable,
         LocalDateTime updatedAt) {
 }
-

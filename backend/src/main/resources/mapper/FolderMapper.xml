@@ -43,5 +43,10 @@
         INSERT INTO folder (owner_user_id, name, display_order, created_at, updated_at)
         VALUES (#{ownerUserId}, #{name}, #{displayOrder}, #{createdAt}, #{updatedAt})
     </insert>
+
+    <delete id="deleteById">
+        DELETE FROM folder
+        WHERE id = #{id}
+    </delete>
 </mapper>
 

@@ -2,21 +2,39 @@ spring:
   application:
     name: my-blog
   datasource:
-    url: ${APP_DATASOURCE_URL:jdbc:mysql://117.72.42.182:3306/my_blog?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Shanghai&charset=utf8mb4}
-    username: ${APP_DATASOURCE_USERNAME:root}
-    password: ${APP_DATASOURCE_PASSWORD:1234}
+    url: ${APP_DATASOURCE_URL:}
+    username: ${APP_DATASOURCE_USERNAME:}
+    password: ${APP_DATASOURCE_PASSWORD:}
     driver-class-name: com.mysql.cj.jdbc.Driver
   sql:
     init:
       mode: never
+  session:
+    timeout: 7d
+    jdbc:
+      initialize-schema: never
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 server:
-  port: ${SERVER_PORT:8080}
+  port: 8080
   forward-headers-strategy: framework
   servlet:
     session:
-      timeout: ${APP_SESSION_TIMEOUT:7d}
+      timeout: 7d
+      cookie:
+        name: JSESSIONID
+        max-age: 7d
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.myblog.domain,com.example.myblog.domain.view
   configuration:
     map-underscore-to-camel-case: true
+app:
+  oss:
+    endpoint: oss-cn-beijing.aliyuncs.com
+    bucket: java--cl
+    access-key-id: ${APP_OSS_ACCESS_KEY_ID:}
+    access-key-secret: ${APP_OSS_ACCESS_KEY_SECRET:}
+    default-cover-url: https://java--cl.oss-cn-beijing.aliyuncs.com/my-blog/default.png

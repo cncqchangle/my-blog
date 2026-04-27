@@ -4,6 +4,7 @@ import com.example.myblog.domain.Folder;
 import com.example.myblog.domain.exception.NotFoundException;
 import com.example.myblog.domain.view.FolderView;
 import com.example.myblog.domain.view.HomePageView;
+import com.example.myblog.domain.view.NoteSummaryView;
 import com.example.myblog.mapper.FolderMapper;
 import com.example.myblog.mapper.NoteMapper;
 import com.example.myblog.mapper.UserAccountMapper;
@@ -16,13 +17,19 @@ public class HomePageService {
     private final UserAccountMapper userAccountMapper;
     private final FolderMapper folderMapper;
     private final NoteMapper noteMapper;
+    private final NotePreviewService notePreviewService;
+    private final CoverImageStorageService coverImageStorageService;
 
     public HomePageService(UserAccountMapper userAccountMapper,
                            FolderMapper folderMapper,
-                           NoteMapper noteMapper) {
+                           NoteMapper noteMapper,
+                           NotePreviewService notePreviewService,
+                           CoverImageStorageService coverImageStorageService) {
         this.userAccountMapper = userAccountMapper;
         this.folderMapper = folderMapper;
         this.noteMapper = noteMapper;
+        this.notePreviewService = notePreviewService;
+        this.coverImageStorageService = coverImageStorageService;
     }
 
     public HomePageView getOwnHomePage(String currentAccount) {
@@ -39,7 +46,14 @@ public class HomePageService {
     }
 
     private FolderView toFolderView(Folder folder) {
-        var notes = noteMapper.findSummariesByFolderId(folder.getId());
+        List<NoteSummaryView> notes = noteMapper.findSummariesByFolderId(folder.getId()).stream()
+                .map(row -> new NoteSummaryView(
+                        row.noteId(),
+                        row.title(),
+                        coverImageStorageService.resolveCoverImageUrl(row.coverImageUrl(), row.title()),
+                        notePreviewService.createPreview(row.markdownContent()),
+                        row.updatedAt()))
+                .toList();
         return new FolderView(folder.getId(), folder.getName(), notes.size(), notes);
     }
 }

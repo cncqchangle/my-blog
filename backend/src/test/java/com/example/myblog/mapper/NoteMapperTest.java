@@ -22,15 +22,38 @@ class NoteMapperTest {
         var detail = noteMapper.findDetailById(100L).orElseThrow();
         assertThat(detail.authorAccount()).isEqualTo("alice");
         assertThat(detail.folderName()).isEqualTo("Java Basics");
+        assertThat(detail.coverImageUrl()).isNull();
     }
 
     @Test
     void updatesMarkdownFields() {
         var note = noteMapper.findById(100L).orElseThrow();
         note.setMarkdownContent("# Changed");
+        note.setCoverImageUrl("https://static.example.com/covers/changed.png");
         note.setRenderedHtml(new MarkdownRenderService().render(note.getMarkdownContent()));
         noteMapper.update(note);
 
         assertThat(noteMapper.findById(100L).orElseThrow().getRenderedHtml()).contains("<h1>Changed</h1>");
+        assertThat(noteMapper.findById(100L).orElseThrow().getCoverImageUrl()).isEqualTo("https://static.example.com/covers/changed.png");
+    }
+
+    @Test
+    void loadsSummaryRowsWithCoverAndMarkdownContent() {
+        var summaries = noteMapper.findSummariesByFolderId(10L);
+
+        assertThat(summaries).hasSize(1);
+        assertThat(summaries.getFirst().coverImageUrl()).isNull();
+        assertThat(summaries.getFirst().markdownContent()).contains("Useful stream notes.");
+    }
+
+    @Test
+    void countsAndDeletesNotesByFolder() {
+        assertThat(noteMapper.countByFolderId(10L)).isEqualTo(1);
+
+        int affectedRows = noteMapper.deleteById(100L);
+
+        assertThat(affectedRows).isEqualTo(1);
+        assertThat(noteMapper.findById(100L)).isEmpty();
+        assertThat(noteMapper.countByFolderId(10L)).isZero();
     }
 }

@@ -49,8 +49,8 @@ public class AuthService {
             SecurityContextHolder.setContext(context);
             securityContextRepository.saveContext(context, request, response);
             return new LoginResponse(authentication.getName());
-        } catch (BadCredentialsException ex) {
-            throw new UnauthorizedException("Invalid account or password");
+        } catch (org.springframework.security.core.AuthenticationException ex) {
+            throw new UnauthorizedException("Invalid account or password: " + ex.getMessage());
         }
     }
 

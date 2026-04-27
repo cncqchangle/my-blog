@@ -1,40 +1,43 @@
-export class Router {
-    constructor(appElement) {
-        this.app = appElement;
-        this.routes = {};
-        window.addEventListener('hashchange', () => this.handleRoute());
-    }
+/**
+ * Router Service - Handles navigation and hash changes
+ */
+const Router = {
+    routes: {
+        '#login': () => App.showLogin(),
+        '#register': () => App.showRegister(),
+        '#home': () => App.showHome(),
+        '#folder/(\\d+)': (id) => App.showFolder(id),
+        '#note/(\\d+)': (id) => App.showNote(id),
+        '#note/new(?:\\?folderId=(\\d+))?': (folderId) => App.showNoteEditor(null, folderId),
+        '#note/edit/(\\d+)': (id) => App.showNoteEditor(id),
+        '#search': () => App.showSearch(),
+        '#user/([^/]+)/home': (account) => App.showUserHome(account)
+    },
 
-    addRoute(path, handler) {
-        this.routes[path] = handler;
-    }
+    init() {
+        window.addEventListener('hashchange', () => this.handleRoute());
+        this.handleRoute();
+    },
+
+    navigate(hash) {
+        window.location.hash = hash;
+    },
 
     handleRoute() {
-        const hash = window.location.hash || '#/';
-        let matched = null;
-        let params = {};
-
-        // Simple param matching for routes like #/note/:id or #/user/:account
-        for (const path in this.routes) {
-            const regexPath = path.replace(/:\w+/g, '([^/]+)');
-            const match = hash.match(new RegExp(`^${regexPath}$`));
+        const hash = window.location.hash || '#home';
+        
+        for (const [pattern, handler] of Object.entries(this.routes)) {
+            const regex = new RegExp(`^${pattern}$`);
+            const match = hash.match(regex);
+            
             if (match) {
-                matched = this.routes[path];
-                const paramNames = (path.match(/:\w+/g) || []).map(p => p.slice(1));
-                paramNames.forEach((name, i) => params[name] = match[i + 1]);
-                break;
+                const args = match.slice(1);
+                handler(...args);
+                return;
             }
         }
-
-        if (matched) {
-            matched(params);
-        } else {
-            console.error('No route matched', hash);
-            window.location.hash = '#/';
-        }
+        
+        // Default route
+        this.navigate('#home');
     }
-
-    navigate(path) {
-        window.location.hash = path;
-    }
-}
+};

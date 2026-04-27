@@ -1,21 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minimal Blog</title>
-    <link rel="stylesheet" href="/css/styles.css">
+    <title>MyBlog - 专业技术博客</title>
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Marked.js (Markdown Parsing) -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <!-- DOMPurify (XSS Protection) -->
+    <script src="https://cdn.jsdelivr.net/npm/dompurify/dist/purify.min.js"></script>
+    <!-- Highlight.js (Code Syntax Highlighting) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <!-- CodeMirror 5 (Markdown Editor) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/monokai.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/markdown/markdown.min.js"></script>
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div id="app">
-        <!-- Views will be mounted here -->
-        <div class="initial-loading">
-            <div class="spinner"></div>
+        <!-- Top Navigation Bar -->
+        <nav id="navbar" class="hidden">
+            <div class="nav-container">
+                <div class="nav-left">
+                    <a href="#home" class="logo">
+                        <i class="ph-fill ph-article text-indigo-600"></i>
+                        <span>MyBlog</span>
+                    </a>
+                    <div class="search-bar" style="position: relative;">
+                        <i class="ph ph-magnifying-glass"></i>
+                        <input type="text" id="global-search" placeholder="搜索作者或文章..." autocomplete="off">
+                        <div id="global-search-results" class="search-dropdown hidden"></div>
+                    </div>
+                </div>
+                <div class="nav-right">
+                    <a href="#home" class="nav-item active">首页</a>
+                    <a href="#search" class="nav-item">发现</a>
+                    <button id="btn-create-note-nav" class="btn-write" style="border: none; cursor: pointer;">
+                        <i class="ph-bold ph-pencil-line"></i>
+                        创作
+                    </button>
+                    <div class="user-menu-wrap">
+                        <div id="user-nav-profile" class="user-avatar">
+                            <span id="nav-user-initial">U</span>
+                        </div>
+                        <div class="user-dropdown">
+                            <div class="dropdown-header">
+                                <p id="dropdown-username" class="font-bold">Username</p>
+                            </div>
+                            <ul class="dropdown-list">
+                                <li><a href="#home"><i class="ph ph-user"></i> 我的主页</a></li>
+                                <li><button id="btn-logout-nav"><i class="ph ph-power"></i> 退出登录</button></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Layout Container -->
+        <div id="main-layout" class="container">
+            <!-- Content Area (Article List or Article Detail) -->
+            <main id="main-content">
+                <div id="view-container">
+                    <div class="loading-state">
+                        <div class="spinner"></div>
+                        <p>正在加载内容...</p>
+                    </div>
+                </div>
+            </main>
+
+            <!-- Sidebar -->
+            <aside id="sidebar" class="hidden">
+                <div id="sidebar-user-card" class="sidebar-box">
+                    <!-- Rendered by UI.js -->
+                </div>
+                
+                <div class="sidebar-box">
+                    <div class="box-header">
+                        <h3 class="box-title">我的分类</h3>
+                        <button id="btn-add-folder-side" class="btn-icon">
+                            <i class="ph-bold ph-plus"></i>
+                        </button>
+                    </div>
+                    <ul id="folder-list" class="folder-list">
+                        <!-- Folders rendered here -->
+                    </ul>
+                </div>
+            </aside>
         </div>
     </div>
-    <script type="module" src="/js/main.js"></script>
+
+    <!-- Modals & Overlays -->
+    <div id="modal-container" class="modal-overlay hidden">
+        <div id="modal-content" class="modal-card">
+            <!-- Modal content injected here -->
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="js/api.js"></script>
+    <script src="js/ui.js"></script>
+    <script src="js/router.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

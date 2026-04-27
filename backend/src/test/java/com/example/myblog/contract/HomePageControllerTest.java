@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -20,7 +21,10 @@ class HomePageControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.ownerAccount", is("alice")))
                 .andExpect(jsonPath("$.isViewerOwner", is(true)))
                 .andExpect(jsonPath("$.folders", hasSize(2)))
-                .andExpect(jsonPath("$.folders[0].notes[0].title", is("Streams")));
+                .andExpect(jsonPath("$.folders[0].notes[0].title", is("Streams")))
+                .andExpect(jsonPath("$.folders[0].notes[0].coverImageUrl", startsWith("data:image/svg+xml;base64,")))
+                .andExpect(jsonPath("$.folders[0].notes[0].contentPreview", startsWith("Streams Useful stream notes")))
+                .andExpect(jsonPath("$.folders[0].notes[0].contentPreview", is("Streams Useful stream notes...")));
     }
 }
 

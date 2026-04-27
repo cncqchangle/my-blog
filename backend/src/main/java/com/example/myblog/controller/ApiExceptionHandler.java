@@ -1,6 +1,7 @@
 package com.example.myblog.controller;
 
 import com.example.myblog.domain.ApiError;
+import com.example.myblog.domain.exception.BadRequestException;
 import com.example.myblog.domain.exception.ConflictException;
 import com.example.myblog.domain.exception.ForbiddenOperationException;
 import com.example.myblog.domain.exception.NotFoundException;
@@ -10,6 +11,8 @@ import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -34,6 +37,16 @@ public class ApiExceptionHandler {
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiError> handleConstraint(ConstraintViolationException ex) {
         return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", ex.getMessage()));
+    }
+
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<ApiError> handleBadRequest(BadRequestException ex) {
+        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", ex.getMessage()));
+    }
+
+    @ExceptionHandler({MaxUploadSizeExceededException.class, MultipartException.class})
+    public ResponseEntity<ApiError> handleMultipart(Exception ex) {
+        return ResponseEntity.badRequest().body(new ApiError("VALIDATION_ERROR", "Cover image must be no larger than 5 MB"));
     }
 
     @ExceptionHandler(NotFoundException.class)

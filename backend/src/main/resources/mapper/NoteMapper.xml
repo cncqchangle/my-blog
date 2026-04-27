@@ -9,6 +9,7 @@
         <result property="authorUserId" column="author_user_id"/>
         <result property="folderId" column="folder_id"/>
         <result property="title" column="title"/>
+        <result property="coverImageUrl" column="cover_image_url"/>
         <result property="markdownContent" column="markdown_content"/>
         <result property="renderedHtml" column="rendered_html"/>
         <result property="publicationStatus" column="publication_status"/>
@@ -16,15 +17,19 @@
         <result property="updatedAt" column="updated_at"/>
     </resultMap>
 
-    <select id="findSummariesByFolderId" resultType="com.example.myblog.domain.view.NoteSummaryView">
-        SELECT id AS noteId, title, updated_at AS updatedAt
+    <select id="findSummariesByFolderId" resultType="com.example.myblog.domain.view.NoteSummaryRow">
+        SELECT id AS noteId,
+               title,
+               cover_image_url AS coverImageUrl,
+               markdown_content AS markdownContent,
+               updated_at AS updatedAt
         FROM note
         WHERE folder_id = #{folderId}
         ORDER BY updated_at DESC, id DESC
     </select>
 
     <select id="findById" resultMap="noteResultMap">
-        SELECT id, author_user_id, folder_id, title, markdown_content, rendered_html, publication_status, created_at, updated_at
+        SELECT id, author_user_id, folder_id, title, cover_image_url, markdown_content, rendered_html, publication_status, created_at, updated_at
         FROM note
         WHERE id = #{id}
     </select>
@@ -35,6 +40,7 @@
                f.id AS folderId,
                f.name AS folderName,
                n.title,
+               n.cover_image_url AS coverImageUrl,
                n.markdown_content AS markdownContent,
                n.rendered_html AS renderedHtml,
                n.updated_at AS updatedAt
@@ -44,19 +50,31 @@
         WHERE n.id = #{noteId}
     </select>
 
+    <select id="countByFolderId" resultType="int">
+        SELECT COUNT(*)
+        FROM note
+        WHERE folder_id = #{folderId}
+    </select>
+
     <insert id="insert" parameterType="com.example.myblog.domain.Note" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO note (author_user_id, folder_id, title, markdown_content, rendered_html, publication_status, created_at, updated_at)
-        VALUES (#{authorUserId}, #{folderId}, #{title}, #{markdownContent}, #{renderedHtml}, #{publicationStatus}, #{createdAt}, #{updatedAt})
+        INSERT INTO note (author_user_id, folder_id, title, cover_image_url, markdown_content, rendered_html, publication_status, created_at, updated_at)
+        VALUES (#{authorUserId}, #{folderId}, #{title}, #{coverImageUrl}, #{markdownContent}, #{renderedHtml}, #{publicationStatus}, #{createdAt}, #{updatedAt})
     </insert>
 
     <update id="update" parameterType="com.example.myblog.domain.Note">
         UPDATE note
         SET folder_id = #{folderId},
             title = #{title},
+            cover_image_url = #{coverImageUrl},
             markdown_content = #{markdownContent},
             rendered_html = #{renderedHtml},
             updated_at = #{updatedAt}
         WHERE id = #{id}
     </update>
+
+    <delete id="deleteById">
+        DELETE FROM note
+        WHERE id = #{id}
+    </delete>
 </mapper>
 
