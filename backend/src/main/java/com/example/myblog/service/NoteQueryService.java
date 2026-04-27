@@ -10,9 +10,11 @@ import org.springframework.stereotype.Service;
 public class NoteQueryService {
 
     private final NoteMapper noteMapper;
+    private final CoverImageStorageService coverImageStorageService;
 
-    public NoteQueryService(NoteMapper noteMapper) {
+    public NoteQueryService(NoteMapper noteMapper, CoverImageStorageService coverImageStorageService) {
         this.noteMapper = noteMapper;
+        this.coverImageStorageService = coverImageStorageService;
     }
 
     public NoteDetailView getNoteDetail(String currentAccount, Long noteId) {
@@ -25,6 +27,7 @@ public class NoteQueryService {
                 row.folderId(),
                 row.folderName(),
                 row.title(),
+                coverImageStorageService.resolveCoverImageUrl(row.coverImageUrl(), row.title()),
                 row.markdownContent(),
                 row.renderedHtml(),
                 editable,

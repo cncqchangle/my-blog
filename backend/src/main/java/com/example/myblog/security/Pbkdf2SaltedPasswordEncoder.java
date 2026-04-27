@@ -10,7 +10,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 public class Pbkdf2SaltedPasswordEncoder implements PasswordEncoder {
 
     private static final int SALT_LENGTH = 16;
-    private static final int ITERATIONS = 185_000;
+    private static final int ITERATIONS = 10_000;
     private static final int KEY_LENGTH = 256;
     private final SecureRandom secureRandom = new SecureRandom();
 

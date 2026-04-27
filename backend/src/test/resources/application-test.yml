@@ -7,8 +7,19 @@ spring:
   sql:
     init:
       mode: never
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
 mybatis:
   mapper-locations: classpath:mapper/*.xml
   type-aliases-package: com.example.myblog.domain,com.example.myblog.domain.view
   configuration:
     map-underscore-to-camel-case: true
+app:
+  oss:
+    endpoint: oss-cn-test.aliyuncs.com
+    bucket: test-bucket
+    access-key-id: test-access-key-id
+    access-key-secret: test-access-key-secret
+    default-cover-url: https://test.example.com/default-cover.png

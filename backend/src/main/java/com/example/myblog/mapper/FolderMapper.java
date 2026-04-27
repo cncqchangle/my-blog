@@ -19,5 +19,7 @@ public interface FolderMapper {
     Integer nextDisplayOrder(@Param("ownerUserId") Long ownerUserId);
 
     int insert(Folder folder);
+
+    int deleteById(@Param("id") Long id);
 }
 

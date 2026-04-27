@@ -9,10 +9,11 @@ import org.springframework.stereotype.Service;
 @Service
 public class MarkdownRenderService {
 
-    private final Parser parser = Parser.builder().build();
-    private final HtmlRenderer renderer = HtmlRenderer.builder().build();
+    private final Parser parser = MarkdownSupport.newParser();
+    private final HtmlRenderer renderer = MarkdownSupport.newRenderer();
     private final Safelist safelist = Safelist.relaxed()
             .addTags("h1", "h2", "h3", "h4", "h5", "h6", "pre", "code")
+            .addTags("ul", "ol", "li", "table", "thead", "tbody", "tr", "th", "td")
             .addAttributes("img", "src", "alt", "title")
             .addProtocols("img", "src", "http", "https");
 

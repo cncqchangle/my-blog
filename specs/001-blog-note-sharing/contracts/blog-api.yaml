@@ -41,12 +41,16 @@ components:
           type: string
     NoteSummary:
       type: object
-      required: [noteId, title, updatedAt]
+      required: [noteId, title, coverImageUrl, contentPreview, updatedAt]
       properties:
         noteId:
           type: integer
           format: int64
         title:
+          type: string
+        coverImageUrl:
+          type: string
+        contentPreview:
           type: string
         updatedAt:
           type: string
@@ -86,6 +90,7 @@ components:
         - folderId
         - folderName
         - title
+        - coverImageUrl
         - markdownContent
         - renderedHtml
         - isEditable
@@ -102,6 +107,8 @@ components:
         folderName:
           type: string
         title:
+          type: string
+        coverImageUrl:
           type: string
         markdownContent:
           type: string
@@ -142,6 +149,9 @@ components:
         folderId:
           type: integer
           format: int64
+        coverImage:
+          type: string
+          format: binary
     UpdateNoteRequest:
       type: object
       required: [title, markdownContent, folderId]
@@ -155,9 +165,12 @@ components:
         folderId:
           type: integer
           format: int64
+        coverImage:
+          type: string
+          format: binary
     NoteSavedResponse:
       type: object
-      required: [noteId, updatedAt, renderedHtml]
+      required: [noteId, updatedAt, renderedHtml, coverImageUrl]
       properties:
         noteId:
           type: integer
@@ -166,6 +179,8 @@ components:
           type: string
           format: date-time
         renderedHtml:
+          type: string
+        coverImageUrl:
           type: string
     SearchUserResponse:
       type: object
@@ -290,13 +305,44 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  /api/folders/{folderId}:
+    delete:
+      summary: Delete an empty top-level folder owned by the logged-in user
+      parameters:
+        - in: path
+          name: folderId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Folder deleted
+        '403':
+          description: Current user does not own the folder
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Folder not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Folder still contains notes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
   /api/notes:
     post:
       summary: Create a note owned by the logged-in user
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/CreateNoteRequest'
       responses:
@@ -341,6 +387,30 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+    delete:
+      summary: Delete a note owned by the logged-in user
+      parameters:
+        - in: path
+          name: noteId
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Note deleted
+        '403':
+          description: Current user is not the note author
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Note not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
     put:
       summary: Update a note owned by the logged-in user
       parameters:
@@ -353,7 +423,7 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          multipart/form-data:
             schema:
               $ref: '#/components/schemas/UpdateNoteRequest'
       responses:

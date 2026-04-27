@@ -9,14 +9,16 @@ import com.example.myblog.service.NoteQueryService;
 import jakarta.validation.Valid;
 import java.security.Principal;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.ModelAttribute;
 
 @RestController
 @RequestMapping("/api/notes")
@@ -36,17 +38,23 @@ public class NoteController {
         return noteQueryService.getNoteDetail(principal.getName(), noteId);
     }
 
-    @PostMapping
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseStatus(HttpStatus.CREATED)
-    public NoteSavedView createNote(@Valid @RequestBody CreateNoteRequest request, Principal principal) {
+    public NoteSavedView createNote(@Valid @ModelAttribute CreateNoteRequest request, Principal principal) {
         return noteCommandService.create(principal.getName(), request);
     }
 
-    @PutMapping("/{noteId}")
+    @PutMapping(value = "/{noteId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public NoteSavedView updateNote(@PathVariable Long noteId,
-                                    @Valid @RequestBody UpdateNoteRequest request,
+                                    @Valid @ModelAttribute UpdateNoteRequest request,
                                     Principal principal) {
         return noteCommandService.update(principal.getName(), noteId, request);
+    }
+
+    @DeleteMapping("/{noteId}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteNote(@PathVariable Long noteId, Principal principal) {
+        noteCommandService.delete(principal.getName(), noteId);
     }
 }
 

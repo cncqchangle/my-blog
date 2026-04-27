@@ -1,6 +1,6 @@
 services:
   my-blog:
-    image: your-registry/my-blog:1.0.0
+    image: crpi-vzbug3vc3o76ithl.cn-beijing.personal.cr.aliyuncs.com/cncqchangle/my-blog:1.0.0
     container_name: my-blog
     restart: unless-stopped
     ports:
@@ -11,5 +11,5 @@ services:
       APP_DATASOURCE_URL: ${APP_DATASOURCE_URL}
       APP_DATASOURCE_USERNAME: ${APP_DATASOURCE_USERNAME}
       APP_DATASOURCE_PASSWORD: ${APP_DATASOURCE_PASSWORD}
-      SERVER_PORT: ${SERVER_PORT:-8080}
-      APP_SESSION_TIMEOUT: ${APP_SESSION_TIMEOUT:-7d}
+      APP_OSS_ACCESS_KEY_ID: ${APP_OSS_ACCESS_KEY_ID}
+      APP_OSS_ACCESS_KEY_SECRET: ${APP_OSS_ACCESS_KEY_SECRET}

@@ -2,9 +2,13 @@ package com.example.myblog.config;
 
 import com.example.myblog.domain.ApiError;
 import com.example.myblog.security.Pbkdf2SaltedPasswordEncoder;
+import com.example.myblog.security.SessionCookieRefreshFilter;
 import com.example.myblog.security.SessionUserDetailsService;
 import jakarta.servlet.http.HttpServletResponse;
+import java.time.Duration;
 import java.nio.charset.StandardCharsets;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.session.autoconfigure.DefaultCookieSerializerCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,6 +22,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.intercept.AuthorizationFilter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
 import org.springframework.security.web.context.SecurityContextRepository;
@@ -26,17 +31,20 @@ import org.springframework.security.web.context.SecurityContextRepository;
 public class SecurityConfig {
 
     @Bean
-    SecurityFilterChain securityFilterChain(HttpSecurity http) {
+    SecurityFilterChain securityFilterChain(HttpSecurity http,
+                                            SessionCookieRefreshFilter sessionCookieRefreshFilter) {
         http.csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED))
                 .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/", "/index.html", "/pages/**", "/css/**", "/js/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/auth/login", "/api/auth/register").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/register").permitAll()
                         .anyRequest().authenticated())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
+                .addFilterAfter(sessionCookieRefreshFilter, AuthorizationFilter.class)
                 .exceptionHandling(exceptions -> exceptions
                         .authenticationEntryPoint((_, response, _) ->
                                 writeJsonError(response, HttpStatus.UNAUTHORIZED, "UNAUTHORIZED", "Authentication is required"))
@@ -61,6 +69,16 @@ public class SecurityConfig {
     @Bean
     PasswordEncoder passwordEncoder() {
         return new Pbkdf2SaltedPasswordEncoder();
+    }
+
+    @Bean
+    DefaultCookieSerializerCustomizer defaultCookieSerializerCustomizer(
+            @Value("${APP_SESSION_TIMEOUT:7d}") Duration sessionTimeout) {
+        int maxAgeSeconds = Math.toIntExact(sessionTimeout.getSeconds());
+        return serializer -> {
+            serializer.setCookieName("JSESSIONID");
+            serializer.setCookieMaxAge(maxAgeSeconds);
+        };
     }
 
     private static void writeJsonError(HttpServletResponse response,

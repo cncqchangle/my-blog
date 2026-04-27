@@ -8,6 +8,7 @@ public record NoteDetailRow(
         Long folderId,
         String folderName,
         String title,
+        String coverImageUrl,
         String markdownContent,
         String renderedHtml,
         LocalDateTime updatedAt) {

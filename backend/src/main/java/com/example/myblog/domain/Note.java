@@ -8,6 +8,7 @@ public class Note {
     private Long authorUserId;
     private Long folderId;
     private String title;
+    private String coverImageUrl;
     private String markdownContent;
     private String renderedHtml;
     private String publicationStatus;
@@ -44,6 +45,14 @@ public class Note {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getCoverImageUrl() {
+        return coverImageUrl;
+    }
+
+    public void setCoverImageUrl(String coverImageUrl) {
+        this.coverImageUrl = coverImageUrl;
     }
 
     public String getMarkdownContent() {
