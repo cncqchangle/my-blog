@@ -83,6 +83,13 @@ const API = {
         });
     },
 
+    renameFolder(folderId, name) {
+        return this.request(`/folders/${folderId}`, {
+            method: 'PUT',
+            body: JSON.stringify({ name })
+        });
+    },
+
     // Notes
     getNote(noteId) {
         return this.request(`/notes/${noteId}`);

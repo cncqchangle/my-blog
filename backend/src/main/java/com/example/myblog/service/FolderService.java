@@ -31,18 +31,36 @@ public class FolderService {
     public FolderCreatedResponse createFolder(String currentAccount, String name) {
         var user = userAccountMapper.findByAccount(currentAccount)
                 .orElseThrow(() -> new NotFoundException("Current user not found"));
-        folderMapper.findByOwnerUserIdAndName(user.getId(), name.trim())
-                .ifPresent(_ -> {
-                    throw new ConflictException("Folder name already exists");
-                });
+        String normalizedName = name.trim();
+        ensureFolderNameAvailable(user.getId(), normalizedName, null);
 
         Folder folder = new Folder();
         folder.setOwnerUserId(user.getId());
-        folder.setName(name.trim());
+        folder.setName(normalizedName);
         folder.setDisplayOrder(folderMapper.nextDisplayOrder(user.getId()));
         folder.setCreatedAt(LocalDateTime.now());
         folder.setUpdatedAt(LocalDateTime.now());
         folderMapper.insert(folder);
+        return new FolderCreatedResponse(folder.getId(), folder.getName());
+    }
+
+    @Transactional
+    public FolderCreatedResponse renameFolder(String currentAccount, Long folderId, String name) {
+        var user = userAccountMapper.findByAccount(currentAccount)
+                .orElseThrow(() -> new NotFoundException("Current user not found"));
+        var folder = folderMapper.findById(folderId)
+                .orElseThrow(() -> new NotFoundException("Folder not found"));
+
+        if (!folder.getOwnerUserId().equals(user.getId())) {
+            throw new ForbiddenOperationException("Current user does not own the folder");
+        }
+
+        String normalizedName = name.trim();
+        ensureFolderNameAvailable(user.getId(), normalizedName, folderId);
+
+        folder.setName(normalizedName);
+        folder.setUpdatedAt(LocalDateTime.now());
+        folderMapper.update(folder);
         return new FolderCreatedResponse(folder.getId(), folder.getName());
     }
 
@@ -61,5 +79,13 @@ public class FolderService {
         }
 
         folderMapper.deleteById(folderId);
+    }
+
+    private void ensureFolderNameAvailable(Long ownerUserId, String name, Long currentFolderId) {
+        folderMapper.findByOwnerUserIdAndName(ownerUserId, name)
+                .filter(existingFolder -> !existingFolder.getId().equals(currentFolderId))
+                .ifPresent(_ -> {
+                    throw new ConflictException("Folder name already exists");
+                });
     }
 }

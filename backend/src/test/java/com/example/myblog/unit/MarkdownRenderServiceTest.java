@@ -46,5 +46,14 @@ class MarkdownRenderServiceTest {
         assertThat(rendered).contains("<img");
         assertThat(rendered).doesNotContain("<script>");
     }
+
+    @Test
+    void rendersSingleNewlineAsLineBreak() {
+        String rendered = markdownRenderService.render("alpha\nbeta");
+
+        assertThat(rendered).contains("<p>alpha");
+        assertThat(rendered).contains("<br>");
+        assertThat(rendered).contains("beta</p>");
+    }
 }
 

@@ -22,6 +22,7 @@ final class MarkdownSupport {
     static HtmlRenderer newRenderer() {
         return HtmlRenderer.builder()
                 .extensions(EXTENSIONS)
+                .softbreak("<br>\n")
                 .build();
     }
 }

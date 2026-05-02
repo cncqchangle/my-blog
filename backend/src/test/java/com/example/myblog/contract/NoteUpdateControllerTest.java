@@ -86,5 +86,24 @@ class NoteUpdateControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.renderedHtml", containsString("<th>Framework</th>")))
                 .andExpect(jsonPath("$.renderedHtml", containsString("<td>Spring Boot</td>")));
     }
+
+    @Test
+    void authorUpdatePreservesSingleLineBreaksInRenderedHtml() throws Exception {
+        var session = loginAs("alice");
+
+        mockMvc.perform(multipart("/api/notes/100")
+                        .session(session)
+                        .param("title", "Streams Updated")
+                        .param("markdownContent", "alpha\nbeta")
+                        .param("folderId", "10")
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.renderedHtml", containsString("alpha")))
+                .andExpect(jsonPath("$.renderedHtml", containsString("<br>")))
+                .andExpect(jsonPath("$.renderedHtml", containsString("beta")));
+    }
 }
 

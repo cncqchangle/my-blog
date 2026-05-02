@@ -20,6 +20,8 @@ public interface FolderMapper {
 
     int insert(Folder folder);
 
+    int update(Folder folder);
+
     int deleteById(@Param("id") Long id);
 }
 

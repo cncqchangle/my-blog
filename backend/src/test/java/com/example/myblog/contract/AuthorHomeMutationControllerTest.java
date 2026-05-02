@@ -12,6 +12,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -31,6 +32,51 @@ class AuthorHomeMutationControllerTest extends BaseIntegrationTest {
                                 """))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.name", is("Algorithms")));
+    }
+
+    @Test
+    void rejectsCreatingFolderWithDuplicateName() throws Exception {
+        var session = loginAs("alice");
+
+        mockMvc.perform(post("/api/folders")
+                        .session(session)
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {"name":"Java Basics"}
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code", is("CONFLICT")))
+                .andExpect(jsonPath("$.message", is("Folder name already exists")));
+    }
+
+    @Test
+    void renamesOwnedFolder() throws Exception {
+        var session = loginAs("alice");
+
+        mockMvc.perform(put("/api/folders/10")
+                        .session(session)
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {"name":"Java Advanced"}
+                                """))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.folderId", is(10)))
+                .andExpect(jsonPath("$.name", is("Java Advanced")));
+    }
+
+    @Test
+    void rejectsRenamingFolderToDuplicateName() throws Exception {
+        var session = loginAs("alice");
+
+        mockMvc.perform(put("/api/folders/10")
+                        .session(session)
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {"name":"Recipes"}
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code", is("CONFLICT")))
+                .andExpect(jsonPath("$.message", is("Folder name already exists")));
     }
 
     @Test

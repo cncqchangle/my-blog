@@ -102,9 +102,14 @@ const UI = {
                     <span class="note-count">${folder.noteCount}</span>
                 </a>
                 ${isOwner ? `
-                    <button class="btn-delete-folder" data-id="${folder.folderId}" title="删除分类">
-                        <i class="ph-bold ph-trash"></i>
-                    </button>
+                    <div class="folder-actions">
+                        <button class="btn-rename-folder" data-id="${folder.folderId}" data-name="${folder.folderName}" title="重命名分类">
+                            <i class="ph-bold ph-pencil-simple"></i>
+                        </button>
+                        <button class="btn-delete-folder" data-id="${folder.folderId}" title="删除分类">
+                            <i class="ph-bold ph-trash"></i>
+                        </button>
+                    </div>
                 ` : ''}
             </li>
         `,
@@ -176,16 +181,10 @@ const UI = {
                     </div>
                     <input type="text" id="editor-title" class="editor-title-input" style="margin-left: 80px;" placeholder="输入文章标题..." value="${note ? note.title : ''}">
                     <div class="nav-right">
-                        <button id="btn-save-note" class="btn-primary">发布文章</button>
+                        <button id="btn-save-note" class="btn-primary">${note ? '保存修改' : '发布文章'}</button>
                     </div>
                 </nav>
                 <div class="editor-body">
-                    <div class="editor-left">
-                        <textarea id="editor-markdown" class="editor-textarea" placeholder="开始您的创作...">${note ? note.markdownContent : ''}</textarea>
-                    </div>
-                    <div class="editor-right prose" id="editor-preview">
-                        <!-- Preview rendered by JS -->
-                    </div>
                     <aside class="editor-config-aside">
                         <div class="config-item">
                             <label class="config-label">发布形式</label>
@@ -227,6 +226,12 @@ const UI = {
                             </ul>
                         </div>
                     </aside>
+                    <div class="editor-left">
+                        <textarea id="editor-markdown" class="editor-textarea" placeholder="开始您的创作...">${note ? note.markdownContent : ''}</textarea>
+                    </div>
+                    <div class="editor-right prose" id="editor-preview">
+                        <!-- Preview rendered by JS -->
+                    </div>
                 </div>
             </div>
         `,

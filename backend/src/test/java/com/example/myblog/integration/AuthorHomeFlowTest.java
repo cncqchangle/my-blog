@@ -9,6 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -77,6 +78,24 @@ class AuthorHomeFlowTest extends BaseIntegrationTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.folders[0].folderName", is("Java Basics")))
                 .andExpect(jsonPath("$.folders[1].folderName", is("Recipes")));
+    }
+
+    @Test
+    void renamingFolderUpdatesItOnHomepage() throws Exception {
+        var session = loginAs("alice");
+
+        mockMvc.perform(put("/api/folders/10")
+                        .session(session)
+                        .contentType(APPLICATION_JSON)
+                        .content("""
+                                {"name":"Java Advanced"}
+                                """))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/users/me/home").session(session))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.folders[0].folderId", is(10)))
+                .andExpect(jsonPath("$.folders[0].folderName", is("Java Advanced")));
     }
 }
 

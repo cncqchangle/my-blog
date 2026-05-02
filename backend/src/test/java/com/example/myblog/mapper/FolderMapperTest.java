@@ -33,4 +33,18 @@ class FolderMapperTest {
         assertThat(affectedRows).isEqualTo(1);
         assertThat(folderMapper.findById(folder.getId())).isEmpty();
     }
+
+    @Test
+    void updatesFolderNameById() {
+        Folder folder = folderMapper.findById(10L).orElseThrow();
+        folder.setName("Java Advanced");
+        folder.setUpdatedAt(LocalDateTime.of(2026, 4, 25, 13, 0));
+
+        int affectedRows = folderMapper.update(folder);
+
+        assertThat(affectedRows).isEqualTo(1);
+        assertThat(folderMapper.findById(10L)).get()
+                .extracting(Folder::getName)
+                .isEqualTo("Java Advanced");
+    }
 }

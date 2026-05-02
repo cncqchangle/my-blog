@@ -1,6 +1,10 @@
 /**
  * Main Application Controller - Classic Blog Version
  */
+marked.setOptions({
+    breaks: true
+});
+
 const App = {
     state: {
         currentUser: null,
@@ -74,6 +78,26 @@ const App = {
             if (!e.target.closest('.search-bar')) {
                 const results = document.getElementById('global-search-results');
                 if (results) results.classList.add('hidden');
+            }
+
+            // Rename Folder
+            const btnRenameFolder = e.target.closest('.btn-rename-folder');
+            if (btnRenameFolder) {
+                e.preventDefault();
+                const folderId = btnRenameFolder.dataset.id;
+                const oldName = btnRenameFolder.dataset.name;
+                const newName = prompt('输入新的分类名称：', oldName);
+                if (newName && newName.trim() !== '' && newName !== oldName) {
+                    try {
+                        await API.renameFolder(folderId, newName.trim());
+                        UI.showToast('分类已重命名');
+                        await this.refreshHomeData();
+                        this.reRenderCurrentView();
+                    } catch (error) {
+                        console.error('Rename folder failed:', error);
+                    }
+                }
+                return;
             }
 
             // Delete Folder
@@ -412,7 +436,7 @@ const App = {
             } catch (err) {
                 UI.showToast(err.message, 'error');
                 saveBtn.disabled = false;
-                saveBtn.textContent = '发布文章';
+                saveBtn.textContent = existingNote ? '保存修改' : '发布文章';
             }
         };
 
