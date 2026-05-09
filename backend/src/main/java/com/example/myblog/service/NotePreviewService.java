@@ -19,7 +19,7 @@ public class NotePreviewService {
             return "";
         }
 
-        String html = renderer.render(parser.parse(markdownContent));
+        String html = renderer.render(parser.parse(MarkdownMathPreprocessor.preprocess(markdownContent)));
         Document document = Jsoup.parseBodyFragment(html);
         document.select("pre, code, img").remove();
         String text = document.text().replaceAll("\\s+", " ").trim();

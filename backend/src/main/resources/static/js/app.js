@@ -365,9 +365,17 @@ const App = {
 
         const updatePreview = () => {
             const raw = cm.getValue();
-            const cleanHtml = DOMPurify.sanitize(marked.parse(raw));
+            const preprocessed = window.MathRenderer
+                ? window.MathRenderer.preprocessMarkdown(raw)
+                : raw;
+            const cleanHtml = DOMPurify.sanitize(marked.parse(preprocessed), {
+                ADD_ATTR: ['class']
+            });
             previewArea.innerHTML = cleanHtml;
             previewArea.querySelectorAll('pre code').forEach(el => hljs.highlightElement(el));
+            if (window.MathRenderer) {
+                window.MathRenderer.renderMath(previewArea);
+            }
         };
 
         cm.on('change', updatePreview);

@@ -817,6 +817,19 @@ button {
     background-color: #fafafa;
 }
 
+.prose .math-inline {
+    white-space: nowrap;
+}
+
+.prose .math-display {
+    display: block;
+    margin: 1.4em 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    text-align: center;
+    padding: 0.25em 0;
+}
+
 /* Loading & Toast */
 .loading-state { text-align: center; padding: 100px 0; color: var(--text-light); }
 .spinner {

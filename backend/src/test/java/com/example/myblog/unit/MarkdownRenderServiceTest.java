@@ -55,5 +55,19 @@ class MarkdownRenderServiceTest {
         assertThat(rendered).contains("<br>");
         assertThat(rendered).contains("beta</p>");
     }
+
+    @Test
+    void preservesMathMarkersAsRenderableHtmlSpans() {
+        String rendered = markdownRenderService.render("""
+                Inline $E=mc^2$
+
+                $$
+                \\int_0^1 x^2 dx
+                $$
+                """);
+
+        assertThat(rendered).contains("<span class=\"math-inline\">E=mc^2</span>");
+        assertThat(rendered).contains("<span class=\"math-display\">\\int_0^1 x^2 dx</span>");
+    }
 }
 

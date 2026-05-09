@@ -105,5 +105,24 @@ class NoteUpdateControllerTest extends BaseIntegrationTest {
                 .andExpect(jsonPath("$.renderedHtml", containsString("<br>")))
                 .andExpect(jsonPath("$.renderedHtml", containsString("beta")));
     }
+
+    @Test
+    void authorCanUpdateOwnedNoteWithMathFormulaMarkup() throws Exception {
+        var session = loginAs("alice");
+
+        mockMvc.perform(multipart("/api/notes/100")
+                        .session(session)
+                        .param("title", "Streams Updated")
+                        .param("markdownContent", "Inline $E=mc^2$\n\n$$\n\\\\int_0^1 x^2 dx\n$$")
+                        .param("folderId", "10")
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.renderedHtml", containsString("math-inline")))
+                .andExpect(jsonPath("$.renderedHtml", containsString("math-display")))
+                .andExpect(jsonPath("$.renderedHtml", containsString("E=mc^2")));
+    }
 }
 

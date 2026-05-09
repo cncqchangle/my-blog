@@ -13,12 +13,14 @@ public class MarkdownRenderService {
     private final HtmlRenderer renderer = MarkdownSupport.newRenderer();
     private final Safelist safelist = Safelist.relaxed()
             .addTags("h1", "h2", "h3", "h4", "h5", "h6", "pre", "code")
+            .addTags("span")
             .addTags("ul", "ol", "li", "table", "thead", "tbody", "tr", "th", "td")
+            .addAttributes("span", "class")
             .addAttributes("img", "src", "alt", "title")
             .addProtocols("img", "src", "http", "https");
 
     public String render(String markdown) {
-        String html = renderer.render(parser.parse(markdown == null ? "" : markdown));
+        String html = renderer.render(parser.parse(MarkdownMathPreprocessor.preprocess(markdown)));
         return Jsoup.clean(html, safelist);
     }
 }

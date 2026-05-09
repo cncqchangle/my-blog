@@ -283,6 +283,9 @@ const UI = {
         document.querySelectorAll('pre code').forEach((el) => {
             hljs.highlightElement(el);
         });
+        if (window.MathRenderer) {
+            window.MathRenderer.renderMath(this.viewContainer);
+        }
     },
 
     renderLogin() {

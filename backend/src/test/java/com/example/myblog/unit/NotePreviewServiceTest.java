@@ -41,4 +41,12 @@ class NotePreviewServiceTest {
         assertThat(preview).hasSize(83);
         assertThat(preview).endsWith("...");
     }
+
+    @Test
+    void createsReadablePreviewFromMathMarkdown() {
+        String preview = notePreviewService.createPreview("Theory $E=mc^2$\n\n$$\n\\int_0^1 x^2 dx\n$$");
+
+        assertThat(preview).isEqualTo("Theory E=mc^2 \\int_0^1 x^2 dx...");
+        assertThat(preview).doesNotContain("$");
+    }
 }
